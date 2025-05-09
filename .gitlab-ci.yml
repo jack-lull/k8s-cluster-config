@@ -1,0 +1,45 @@
+stages:
+  - apply-test
+  - diff
+  - apply
+
+apply-test:
+  stage: apply-test
+  tags:
+  - k8s-test-access
+  image: ghcr.io/helmfile/helmfile:v0.170.1
+  script:
+    - mkdir -p $HOME/.kube
+    - echo $KUBECONFIG_CONTENT | base64 -d > $HOME/.kube/config
+    - helmfile -e test apply
+
+diff:
+  stage: diff
+  tags:
+    - k8s-access
+  image: ghcr.io/helmfile/helmfile:v0.170.1
+  except:
+    - master
+  script:
+    - mkdir -p $HOME/.kube
+    - echo $KUBECONFIG_CONTENT | base64 -d > $HOME/.kube/config
+    - helmfile diff -e internal
+  # parallel:
+    # matrix:
+      # - ENV: internal
+
+apply:
+  stage: apply
+  tags:
+    - k8s-access
+  image: ghcr.io/helmfile/helmfile:v0.170.1
+  only:
+    - master
+  script:
+    - mkdir -p $HOME/.kube
+    - echo $KUBECONFIG_CONTENT | base64 -d > $HOME/.kube/config
+    - helmfile apply -e internal
+  # parallel:
+    # matrix:
+      # - ENV: internal
+  

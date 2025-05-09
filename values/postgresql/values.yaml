@@ -1,0 +1,12 @@
+auth:
+  database: postgres
+
+global:
+  storageClass: openebs-hostpath
+
+primary:
+  persistence:
+    size: 8Gi
+
+metrics:
+  enabled: false

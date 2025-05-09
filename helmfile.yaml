@@ -1,0 +1,186 @@
+repositories:
+  - name: jetstack
+    url: "https://charts.jetstack.io"
+  - name: bitnami
+    url: registry-1.docker.io/bitnamicharts
+    oci: true
+  - name: db-operator
+    url: https://db-operator.github.io/charts
+  - name: "kubernetes-incubator"
+    url: "https://charts.helm.sh/incubator"
+  - name: minio
+    url: https://charts.min.io/
+  - name: openebs
+    url: https://openebs.github.io/openebs
+  - name: metallb
+    url: https://metallb.github.io/metallb
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+  - name: vaultwarden
+    url: git+https://github.com/jack-lull/vaultwarden@chart?ref=ci_build
+releases:
+
+### kube-system namespace
+- name: cert-manager
+  namespace: kube-system
+  chart: jetstack/cert-manager
+  values:
+    - values/cert-manager/values.yaml
+  set:
+    - name: installCRDs
+      value: true
+  version: v1.12.2
+  installed: true
+
+- name: cert-manager-issuers
+  namespace: kube-system
+  chart: kubernetes-incubator/raw
+  # values:
+    # - values/cert-manager-issuers/values.yaml
+  needs:
+    - cert-manager
+  version: 0.2.5
+  installed: true
+
+- name: metallb
+  namespace: kube-system
+  chart: metallb/metallb
+  values:
+    - values/metallb/values.yaml
+  createNamespace: true
+  version: 0.14.8
+  installed: true
+
+- name: openebs
+  namespace: kube-system
+  chart: openebs/openebs
+  values:
+    - values/openebs/values.yaml
+  createNamespace: true
+  version: 4.1.0
+  installed: true
+
+- name: traefik
+  namespace: kube-system
+  chart: traefik/traefik
+  values:
+    - values/traefik/values.yaml
+  createNamespace: true
+  version: 27.0.0
+  installed: true
+
+### database-service namespace
+- name: redis-prod
+  namespace: database-service
+  chart: bitnami/redis
+  values:
+    - values/redis/values.yaml
+  secrets:
+    - values/redis/secrets-prod.yaml
+  createNamespace: true
+  version: "18.19.4"
+  installed: true
+
+- name: redis-dev
+  namespace: database-service
+  chart: bitnami/redis
+  values:
+    - values/redis/values.yaml
+  secrets:
+    - values/redis/secrets-dev.yaml
+  createNamespace: true
+  version: "18.19.4"
+  installed: false
+
+- name: postgresql
+  namespace: database-service
+  chart: bitnami/postgresql
+  values:
+    - values/postgresql/values.yaml
+  secrets:
+    - values/postgresql/secrets.yaml
+  createNamespace: true
+  version: "13.4.6"
+  installed: true
+
+- name: postgresql-dev
+  namespace: database-service
+  chart: bitnami/postgresql
+  values:
+    - values/postgresql/values.yaml
+  secrets:
+    - values/postgresql/secrets-dev.yaml
+  createNamespace: true
+  version: "13.4.6"
+  installed: false
+
+### devops-system namespace
+- name: db-operator
+  namespace: devops-system
+  chart: db-operator/db-operator
+  labels:
+    app: db-operator
+  createNamespace: true
+  version: 1.35.0
+  installed: true
+
+- name: db-instances
+  namespace: devops-system
+  chart: db-operator/db-instances
+  values:
+    - values/db-operator/values-instances.yaml
+  secrets:
+    - values/db-operator/secrets-instances.yaml
+  labels:
+    app: db-operator
+  createNamespace: true
+  version: "2.4.0"
+  installed: true
+
+### velero namespace
+- name: velero
+  namespace: velero
+  chart: vmware-tanzu/velero
+  values:
+    - values/velero/values.yaml
+  secrets:
+    - values/velero/secrets.yaml
+  createNamespace: true
+  version: 8.3.0
+  installed: true
+
+### minio namespace
+- name: minio
+  namespace: minio
+  chart: minio/minio
+  values:
+    - values/minio/values.yaml
+  secrets:
+    - values/minio/secrets.yaml
+  createNamespace: true
+  version: "5.0.9"
+  installed: true
+
+### argocd namespace
+- name: argo
+  namespace: argocd
+  chart: argo/argo-cd
+  values:
+    - values/argocd/values.yaml
+  secrets:
+    - values/argocd/secrets.yaml
+  createNamespace: true
+  # version: 
+  installed: true 
+
+### app-production namespace
+- name: vaultwarden
+  namespace: vaultwarden
+  chart: vaultwarden/vaultwarden
+  # values:
+    # - values/vaultwarden/values.yaml
+  createNamespace: true
+  # version: 
+  installed: true

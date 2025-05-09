@@ -1,0 +1,89 @@
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.7.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+configuration:
+  backupStorageLocation:
+  - name: etersoftprod
+    # caCert: |-
+      # LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVBekNDQXV1Z0F3SUJBZ0lVVGpCRzRtZTdMWDFjS205bHhvZE1FcTBabEcwd0RRWUpLb1pJaHZjTkFRRUwKQlFBd2J6RUxNQWtHQTFVRUJoTUNVbFV4R1RBWEJnTlZCQWNNRUZOaGFXNTBJRkJsZEdWeWMySjFjbWN4RVRBUApCZ05WQkFvTUNFVjBaWEp6YjJaME1SRXdEd1lEVlFRRERBaGxkR1Z5YzI5bWRERWZNQjBHQ1NxR1NJYjNEUUVKCkFSWVFhVzVtYjBCbGRHVnljMjltZEM1eWRUQWVGdzB5TkRBek1ERXhNak0zTXpoYUZ3MHpOekV4TURneE1qTTMKTXpoYU1JR1FNUXN3Q1FZRFZRUUdFd0pTVlRFWk1CY0dBMVVFQ0F3UVUyRnBiblFnVUdWMFpYSnpZblZ5WnpFWgpNQmNHQTFVRUJ3d1FVMkZwYm5RZ1VHVjBaWEp6WW5WeVp6RVJNQThHQTFVRUNnd0lSWFJsY25OdlpuUXhIekFkCkJna3Foa2lHOXcwQkNRRVdFR2x1Wm05QVpYUmxjbk52Wm5RdWNuVXhGekFWQmdOVkJBTU1Ebk16TG1WMFpYSm0KZFc1a0xuSjFNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXZRY0E5MzEzcFl3YwpZVTZpdXNHWjBocys2Q2YyS3IzRVc4ZnMxTncrbTRMeVY5RjF1Y3RmZnFVZ28wcGVMaDYwNzVQZ1g0dHEyUFdTCmJIN1pEdkZqS1ZNSUo1dk1yVDFXUDFDYWtDeGM4T1BSWVlXODBKY21sMmxseXdCM1NjK2pya1BIeVB6cVB0OVYKTFp4bFFpd3g2U01aVmdoNVQ4U2o1VGVkdFZYclFEOFFDdVVVd2pSNG4rdDRMWGRlUDVEMS9Zb3Y5M1VHTVI3NAprSTVHdEplSURCdmRXZ0JGZVo0R3ZYZDhxZTZ2RmhpNXl3QkFGcVJTcEtmcHkzV25URlB4N2c2S2U3RFZoL0lLCklLdjlMcUltS1EvS2hLK1lUcmFPcFNuUzQvZnRESjdBVGJ5ZGh0cDRjMnErOUIxUFpMUlM3MGFwSks5WWptbnYKN0NIM2lrR25OUUlEQVFBQm8zVXdjekFmQmdOVkhTTUVHREFXZ0JROWo1dTZ1RWJBenZQdTA3RG1OZ0tjaVJxNwozVEFKQmdOVkhSTUVBakFBTUFzR0ExVWREd1FFQXdJRThEQVpCZ05WSFJFRUVqQVFnZzV6TXk1bGRHVnlablZ1ClpDNXlkVEFkQmdOVkhRNEVGZ1FVWUY4SExCUGcyZXlnd1lHUzgycGFUTDlBa1F3d0RRWUpLb1pJaHZjTkFRRUwKQlFBRGdnRUJBSmd6YnZoaHZXUXpBczVFbC9PMXE3bmErbGRFcWJ2U2cwZ3JyV2ZjS0ZlK2srOG9uZnBSa25jSAovS09sWEVBWWxXclI2Rk9tYXJzMkNIeXEzcENLN3RZYWIycE83L05LTGRYQ2ovZmxrQmU3NnZPMU9kQlRKZmVFCm9KeXp1c1AyUVh1aU9FSHkrcUlTQ1JvR2JQQm90L1JqcDViSlpLSWQwS0lTeWtWYUNacWVRY3hVTmNDa0VqR04KMmprTFg3SlBMMEcrbEdiSnNUU1l4YXNtcDVDdWtESUdHTVlnbkJBTFpsS2w3SC8yRUdsdnB0blN6ZFNHRnBRUgpJZG85eHJEUTFUZmRZQUl0QUFtQTkwdFg3NVNUdGZZUHhzK2VFT1NpeFBxTGxkOXZ2a3hQR0UyQjJFRHVHZk5SClNzWnoxd1Jua0gxWFRDZ3hyU0NwWHduaUF6bHVUSDA9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    provider: aws
+    plugin: velero/velero-plugin-for-aws:v1.2.1
+    bucket: backup-storage
+    accessMode: ReadWrite
+    credential:
+      name: velero-s3-creds
+      key: data
+    config:
+      region: us-east-1
+      s3ForcePathStyle: true
+      s3Url: https://s3.k8svkr.eterfund.ru:443
+      publicUrl: https://s3.k8svkr.eterfund.ru:443
+  volumeSnapshotLocation:
+  - name: etersoftprod
+    provider: aws
+    config:
+      region: us-east-1
+
+deployNodeAgent: true
+schedules:
+  daily:
+    disabled: false
+    labels:
+      backups: daily
+    schedule: "0 0 * * *"
+    useOwnerReferencesInBackup: true
+    paused: false
+    template:
+      defaultVolumesToFsBackup: true
+      ttl: "240h"
+      storageLocation: etersoftprod
+      includedNamespaces:
+        - minio
+        - database-service
+  weekly:
+    disabled: false
+    labels:
+      backups: weekly
+    schedule: "0 1 * * 0"
+    useOwnerReferencesInBackup: true
+    paused: false
+    template:
+      defaultVolumesToFsBackup: true
+      ttl: "672h"
+      storageLocation: etersoftprod
+      includedNamespaces:
+        - minio
+        - database-service
+  montly:
+    disabled: false
+    labels:
+      backups: monthly
+    schedule: "0 3 1 * *"
+    useOwnerReferencesInBackup: true
+    paused: false
+    template:
+      defaultVolumesToFsBackup: true
+      ttl: "1344h"
+      storageLocation: etersoftprod
+      includedNamespaces:
+        - minio
+        - database-service
+  regular:
+    disabled: false
+    labels:
+      backups: regular
+    schedule: "0 */3 * * *"
+    useOwnerReferencesInBackup: true
+    paused: false
+    template:
+      defaultVolumesToFsBackup: true
+      ttl: "24h"
+      storageLocation: etersoftprod
+      includedNamespaces:
+        - minio
+        - database-service

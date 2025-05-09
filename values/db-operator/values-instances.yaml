@@ -1,0 +1,11 @@
+---
+dbinstances:
+  postgres:
+    serviceMonitor:
+      enabled: false
+    engine: postgres
+    monitoring:
+      enabled: false
+    generic:
+      host: postgresql.database-service.svc.cluster.local
+      port: 5432
