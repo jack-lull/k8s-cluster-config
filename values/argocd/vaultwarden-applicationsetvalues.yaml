@@ -1,0 +1,189 @@
+# applicationsets:
+  # enabled: true
+  # vaultwarden-applicationset:
+    # generators:
+    # - pullRequest:
+        # github:
+          # owner: jack-lull
+          # repo: vaultwarden
+          # tokenRef:
+            # secretName: github-token
+            # key: token
+    # template:
+      # metadata:
+        # name: vaultwarden-pr-1
+      # spec:
+        # syncPolicy: 
+          # syncOptions:
+          # - CreateNamespace=true  
+        # project: default
+        # source:
+          # chart: vaultwarden
+          # repoURL: https://github.com/jack-lull/vaultwarden/tree/ci_build/chart
+          # targetRevision: 0.1.0
+          # helm:
+            # parameters:
+            # - name: "image.tag"
+              # value: $ARGOCD_APP_REVISION
+            # releaseName: vaultwarden
+            # valueFiles:
+              # - values.yaml
+        # destination:
+          # server: "https://kubernetes.default.svc"
+          # namespace: testing
+
+applicationsets:
+  vaultwarden-pr:
+    goTemplate: true
+    goTemplateOptions: ["missingkey=error"]
+    namespace: argocd
+    additionalLabels: {}
+    additionalAnnotations: {}
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
+    # See PR #10026 (ArgoCD v2.5 or later)
+    # goTemplate: false
+    generators:
+    - pullRequest:
+        github:
+          owner: jack-lull
+          repo: vaultwarden
+          tokenRef:
+            secretName: github-token
+            key: token
+    # Ref https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/#allow-temporarily-toggling-auto-sync
+    ignoreApplicationDifferences:
+    - jsonPointers:
+      - /spec/syncPolicy
+    # Progressive Syncs is an experimental feature and it must be explicitly enabled
+    # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Progressive-Syncs/#enabling-progressive-syncs
+    strategy:
+      type: RollingSync
+      rollingSync:
+        steps:
+        - matchExpressions:
+          - key: project
+            operator: In
+            values:
+            - guestbook
+        - matchExpressions:
+          - key: project
+            operator: In
+            values:
+            - kustomize-foo
+            - kustomize-bar
+    template:
+      metadata:
+        name: 'vaultwarden-pr-{{ .number }}'
+        labels:
+          project: 'vaultwarden-pr'
+        annotations: {}
+      spec:
+        project: 'default'
+        source:
+          repoURL: https://github.com/jack-lull/vaultwarden
+          targetRevision: '{{ .head_sha }}'
+          path: chart
+          helm:
+            parameters:
+            - name: "image.tag"
+              value: '{{ .head_sha }}'
+            releaseName: vaultwarden
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: 'app-prewiev-{{ .number }}'
+        syncPolicy:
+          automated:
+            prune: false
+            selfHeal: false
+          syncOptions:
+          - CreateNamespace=true  
+        ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+          - /spec/replicas
+        info:
+        - name: url
+          value: https://argoproj.github.io/
+    syncPolicy:
+      # Set Application finalizer
+      preserveResourcesOnDeletion: false
+    # Templating is only available on string type
+
+  vaultwarden-prod:
+    goTemplate: true
+    goTemplateOptions: ["missingkey=error"]
+    namespace: argocd
+    additionalLabels: {}
+    additionalAnnotations: {}
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
+    # See PR #10026 (ArgoCD v2.5 or later)
+    # goTemplate: false
+    generators:
+    - git:
+        repoURL: https://github.com/jack-lull/vaultwarden
+        revision: ci_build
+        directories:
+        - path: chart
+    # Ref https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/#allow-temporarily-toggling-auto-sync
+    ignoreApplicationDifferences:
+    - jsonPointers:
+      - /spec/syncPolicy
+    # Progressive Syncs is an experimental feature and it must be explicitly enabled
+    # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Progressive-Syncs/#enabling-progressive-syncs
+    strategy:
+      type: RollingSync
+      rollingSync:
+        steps:
+        - matchExpressions:
+          - key: project
+            operator: In
+            values:
+            - guestbook
+        - matchExpressions:
+          - key: project
+            operator: In
+            values:
+            - kustomize-foo
+            - kustomize-bar
+    template:
+      metadata:
+        name: 'vaultwarden-prod'
+        labels:
+          project: 'vaultwarden-prod'
+        annotations: {}
+      spec:
+        project: 'default'
+        source:
+          repoURL: https://github.com/jack-lull/vaultwarden
+          targetRevision: main
+          path: chart
+          helm:
+            parameters:
+            - name: "image.tag"
+              value: 'latest'
+            releaseName: vaultwarden
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: 'app-prod'
+        syncPolicy:
+          automated:
+            prune: false
+            selfHeal: false
+          syncOptions:
+          - CreateNamespace=true  
+        ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+          - /spec/replicas
+        info:
+        - name: url
+          value: https://argoproj.github.io/
+    syncPolicy:
+      # Set Application finalizer
+      preserveResourcesOnDeletion: false
+    # Templating is only available on string type
+  

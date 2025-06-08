@@ -1,8 +1,0 @@
-metrics:
-  enabled: false
-
-architecture: standalone
-
-master:
-  persistence:
-    enabled: false

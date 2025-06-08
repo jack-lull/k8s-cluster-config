@@ -72,28 +72,6 @@ releases:
   installed: true
 
 ### database-service namespace
-- name: redis-prod
-  namespace: database-service
-  chart: bitnami/redis
-  values:
-    - values/redis/values.yaml
-  secrets:
-    - values/redis/secrets-prod.yaml
-  createNamespace: true
-  version: "18.19.4"
-  installed: true
-
-- name: redis-dev
-  namespace: database-service
-  chart: bitnami/redis
-  values:
-    - values/redis/values.yaml
-  secrets:
-    - values/redis/secrets-dev.yaml
-  createNamespace: true
-  version: "18.19.4"
-  installed: false
-
 - name: postgresql
   namespace: database-service
   chart: bitnami/postgresql
@@ -151,18 +129,6 @@ releases:
   version: 8.3.0
   installed: true
 
-### minio namespace
-- name: minio
-  namespace: minio
-  chart: minio/minio
-  values:
-    - values/minio/values.yaml
-  secrets:
-    - values/minio/secrets.yaml
-  createNamespace: true
-  version: "5.0.9"
-  installed: true
-
 ### argocd namespace
 - name: argo
   namespace: argocd
@@ -175,12 +141,11 @@ releases:
   # version: 
   installed: true 
 
-### app-production namespace
-- name: vaultwarden
-  namespace: vaultwarden
-  chart: vaultwarden/vaultwarden
-  # values:
-    # - values/vaultwarden/values.yaml
+- name: argocd-apps
+  namespace: argocd
+  chart: argo/argocd-apps
+  values:
+    - values/argocd/vaultwarden-applicationsetvalues.yaml
   createNamespace: true
-  # version: 
-  installed: true
+  version: 2.0.2
+  installed: true 
